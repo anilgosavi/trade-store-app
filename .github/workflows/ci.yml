@@ -34,10 +34,14 @@ jobs:
       - name: Run tests
         run: mvn test
 
+      - name: Install Trivy
+        run: |
+          sudo apt-get install wget -y
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.37.3/trivy_0.37.3_Linux-64bit.deb
+          sudo dpkg -i trivy_0.37.3_Linux-64bit.deb
+
       - name: Security scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          severity: CRITICAL,HIGH
+        run: trivy fs --exit-code 1 --severity CRITICAL,HIGH .
 
       - name: Fail on vulnerability
         if: failure()
