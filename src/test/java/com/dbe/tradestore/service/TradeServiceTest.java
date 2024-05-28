@@ -1,5 +1,6 @@
 package com.dbe.tradestore.service;
 
+import com.dbe.tradestore.ExpireTrades;
 import com.dbe.tradestore.exception.InvalidTradeException;
 import com.dbe.tradestore.model.Trade;
 import com.dbe.tradestore.repository.TradeRepository;
@@ -11,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,6 +31,9 @@ public class TradeServiceTest {
     @InjectMocks
     private TradeService tradeService;
 
+    @InjectMocks
+    private ExpireTrades expireTrades;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -36,12 +42,12 @@ public class TradeServiceTest {
     @Test
     public void testSaveTradeWithLowerVersion() {
         Trade trade = new Trade();
-        trade.setId("T1");
+        trade.setTradeId("T1");
         trade.setVersion(1);
         trade.setMaturityDate(LocalDate.now().plusDays(1));
 
         Trade existingTrade = new Trade();
-        existingTrade.setId("T1");
+        existingTrade.setTradeId("T1");
         existingTrade.setVersion(2);
 
         when(tradeRepository.findById(any(String.class))).thenReturn(Optional.of(existingTrade));
@@ -54,12 +60,12 @@ public class TradeServiceTest {
     @Test
     public void testSaveTradeWithHigherVersion() {
         Trade trade = new Trade();
-        trade.setId("T1");
+        trade.setTradeId("T1");
         trade.setVersion(2);
         trade.setMaturityDate(LocalDate.now().plusDays(1));
 
         Trade existingTrade = new Trade();
-        existingTrade.setId("T1");
+        existingTrade.setTradeId("T1");
         existingTrade.setVersion(1);
 
         when(tradeRepository.findById(any(String.class))).thenReturn(Optional.of(existingTrade));
@@ -68,5 +74,20 @@ public class TradeServiceTest {
         tradeService.saveTrade(trade);
 
         verify(tradeRepository, times(1)).save(trade);
+    }
+
+    @Test
+    public void testUpdateExpiredTrades(){
+        List<Trade> trades = new ArrayList<>();
+        trades.add(new Trade("T1", 1, "CP-1", "B1", LocalDate.now()));
+        trades.add(new Trade("T2", 1, "CP-2", "B2", LocalDate.now().minusDays(1)));
+        trades.add(new Trade("T3", 1, "CP-3", "B3", LocalDate.now().plusDays(1)));
+
+        when(tradeRepository.findAll()).thenReturn(trades);
+
+        expireTrades.updateTradeExpiry();
+
+        verify(tradeRepository).save(trades.get(1));
+
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,7 +22,7 @@ public class TradeService {
 
     public Trade saveTrade(Trade trade){
         tradeValidator.validateTrade(trade);
-        Optional<Trade> existingTrade = tradeRepository.findById(trade.getId());
+        Optional<Trade> existingTrade = tradeRepository.findById(trade.getTradeId());
 
         if (existingTrade.isPresent()){
             if (existingTrade.get().getVersion() > trade.getVersion())
@@ -31,4 +32,7 @@ public class TradeService {
         return tradeRepository.save(trade);
     }
 
+    public List<Trade> getTrades() {
+        return tradeRepository.findAll();
+    }
 }

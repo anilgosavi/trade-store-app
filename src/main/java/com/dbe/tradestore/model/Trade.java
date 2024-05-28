@@ -1,30 +1,40 @@
 package com.dbe.tradestore.model;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-@Document(collation = "trades")
+@Document
 public class Trade {
 
     @Id
-    private String Id;
+    private String tradeId;
     private int version;
     private String counterPartyId;
     private String bookId;
     private LocalDate maturityDate;
     private LocalDate createdDate;
     private boolean expired;
+    public Trade(){
 
-
-    public String getId() {
-        return Id;
+    }
+    public Trade(String tradeId, int version, String counterPartyId, String bookId, LocalDate maturityDate){
+        this.tradeId = tradeId;
+        this.version = version;
+        this.counterPartyId = counterPartyId;
+        this.bookId = bookId;
+        this.maturityDate = maturityDate;
+        this.createdDate = LocalDate.now();
+        this.expired = false;
     }
 
-    public void setId(String id) {
-        Id = id;
+    public String getTradeId() {
+        return tradeId;
+    }
+
+    public void setTradeId(String tradeId) {
+        this.tradeId = tradeId;
     }
 
     public int getVersion() {
